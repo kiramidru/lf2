@@ -28,14 +28,28 @@ jobs:
 
       - name: Build Binary
         run: |
+          # Disable bundling to get a raw binary
           sed -i 's/"active": true/"active": false/g' src-tauri/tauri.conf.json
           cargo tauri build
 
-      - name: Create Tarball
+      - name: Create Structured Tarball
         run: |
-          mkdir -p release
-          cp src-tauri/target/release/lf2 release/ || cp src-tauri/target/release/little-fighter-2 release/
-          tar -czvf lf2-linux-x86_64.tar.gz -C release .
+          # 1. Create a versioned staging directory (important for Nix unpackPhase)
+          export RELEASE_NAME="lf2-${{ github.ref_name }}"
+          mkdir -p "$RELEASE_NAME"
+          
+          # 2. Copy binary into the staging folder
+          cp src-tauri/target/release/lf2 "$RELEASE_NAME/" || cp src-tauri/target/release/little-fighter-2 "$RELEASE_NAME/"
+          
+          # 3. Copy the assets (src folder) into the staging folder
+          # This maintains the pathing the binary expects
+          cp -r src "$RELEASE_NAME/"
+          
+          # 4. Copy icons for the Nix desktop entry
+          cp -r src-tauri/icons "$RELEASE_NAME/"
+          
+          # 5. Compress the directory itself, not just the contents
+          tar -czvf lf2-linux-x86_64.tar.gz "$RELEASE_NAME/"
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
