@@ -41,7 +41,7 @@ pkgs.stdenv.mkDerivation {
 
   src = pkgs.fetchurl {
     url = "https://github.com/kiramidru/lf2/releases/download/v${version}/lf2-linux-x86_64.tar.gz";
-    hash = "sha256-cW/knAIV23XTf5dppYXQsuof/g6gtWw90c86S6a356s=";
+    hash = "sha256-1i6zmTRTuS8u7Uf7QxAKfr0d0huq9Blz5udfaUmURp0=";
   };
 
   nativeBuildInputs = with pkgs; [
@@ -50,10 +50,13 @@ pkgs.stdenv.mkDerivation {
     copyDesktopItems
   ];
 
-  buildInputs = libraries ++ gst_plugins ++ (with pkgs; [
-    glib
-    gsettings-desktop-schemas
-  ]);
+  buildInputs =
+    libraries
+    ++ gst_plugins
+    ++ (with pkgs; [
+      glib
+      gsettings-desktop-schemas
+    ]);
 
   desktopItems = [ desktopItem ];
 
@@ -77,7 +80,9 @@ pkgs.stdenv.mkDerivation {
 
   preFixup = ''
     gappsWrapperArgs+=(
-      --set GST_PLUGIN_SYSTEM_PATH_1_0 "${lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins}"
+      --set GST_PLUGIN_SYSTEM_PATH_1_0 "${
+        lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins
+      }"
     )
   '';
 
