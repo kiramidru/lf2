@@ -35,8 +35,9 @@ jobs:
         run: |
           export RELEASE_NAME="lf2-${{ github.ref_name }}"
           mkdir -p "$RELEASE_NAME"
+          
           cp src-tauri/target/release/lf2 "$RELEASE_NAME/" || cp src-tauri/target/release/little-fighter-2 "$RELEASE_NAME/"
-          cp -r src "$RELEASE_NAME/"
+          cp -r dist "$RELEASE_NAME/"
           cp -r src-tauri/icons "$RELEASE_NAME/"
           tar -czvf lf2-linux-x86_64.tar.gz "$RELEASE_NAME/"
 

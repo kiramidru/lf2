@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "identifier": "com.kira.lf2",
     "build": {
-        "frontendDist": "../src"
+        "frontendDist": "../dist"
     },
     "app": {
         "withGlobalTauri": true,
@@ -19,7 +19,7 @@
             }
         ],
         "security": {
-            "csp": null
+            "csp": "default-src 'self'; connect-src 'self' http://* https://* ws://* wss://*; img-src 'self' asset: https://*; style-src 'self' 'unsafe-inline';"
         }
     },
     "bundle": {
