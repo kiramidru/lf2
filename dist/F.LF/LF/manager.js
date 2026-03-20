@@ -363,11 +363,7 @@ define(['LF/global', 'LF/network', 'LF/soundpack', 'LF/match', 'LF/util', 'LF/to
                 if (I === 0) {
                   manager.start_game()
                 } else if (I === 1) {
-                  if (window.location.href.indexOf('http') === 0) {
-                    manager.switch_UI('network_game')
-                  } else {
-                    manager.alert('network game must run under http://')
-                  }
+                  manager.switch_UI('network_game')
                 } else if (I === 2) {
                   manager.switch_UI('settings')
                 }
