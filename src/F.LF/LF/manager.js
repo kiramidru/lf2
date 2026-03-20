@@ -37,6 +37,15 @@ define(['LF/global', 'LF/network', 'LF/soundpack', 'LF/match', 'LF/util', 'LF/to
               util.div('maximize_button').onclick()
             }
           }
+          if (!window_state.maximized &&
+            window.innerWidth > global.application.window.outer_width * 1.2 &&
+            window.innerHeight > global.application.window.outer_height * 1.2) {
+            window_state.maximized = true
+            document.body.style.background = manager.UI_list[manager.active_UI]?.bgcolor || '#000'
+            util.div('maximize_button').firstChild.innerHTML = '&#9724;'
+            util.container.classList.add('maximized')
+            util.div('extra_UI').classList.add('maximized')
+          }
           resizer()
         }
         function getFeature(from, feature) {
@@ -60,7 +69,7 @@ define(['LF/global', 'LF/network', 'LF/soundpack', 'LF/match', 'LF/util', 'LF/to
                 fullscreen()
               }
               window_state.maximized = true
-              document.body.style.background = manager.UI_list[manager.active_UI].bgcolor || '#676767'
+              document.body.style.background = manager.UI_list[manager.active_UI].bgcolor || '#000'
               this.firstChild.innerHTML = '&#9724;'
               util.container.classList.add('maximized')
               util.div('extra_UI').classList.add('maximized')
@@ -1257,7 +1266,7 @@ define(['LF/global', 'LF/network', 'LF/soundpack', 'LF/match', 'LF/util', 'LF/to
                 return new Fsprite({
                   canvas: canvas_node,
                   type: 'group',
-                  bgcolor: '#676767',
+                  bgcolor: '#000',
                   wh: { w: global.application.window.width, h: global.application.window.height }
                 })
               }
@@ -1291,44 +1300,42 @@ define(['LF/global', 'LF/network', 'LF/soundpack', 'LF/match', 'LF/util', 'LF/to
             util.container.classList.remove('wideWindow')
           }
           let fratio = ratio
+          let ratiow, ratioh
           if (typeof ratio !== 'number') {
             const width = parseInt(window.getComputedStyle(util.container, null).getPropertyValue('width'))
             const height = parseInt(window.getComputedStyle(util.container, null).getPropertyValue('height'))
             this.width = width
             if (height > 100) { this.height = height }
             if (!landscape) {
-              var ratioh = window.innerHeight / this.height
-              var ratiow = window.innerWidth / this.width
+              ratioh = window.innerHeight / this.height
+              ratiow = window.innerWidth / this.width
             } else {
-              var ratioh = window.innerHeight / this.width
-              var ratiow = window.innerWidth / this.height
+              ratioh = window.innerHeight / this.width
+              ratiow = window.innerWidth / this.height
             }
             ratio = ratioh < ratiow ? ratioh : ratiow
             fratio = ratio
             ratio = Math.floor(ratio * 100) / 100
+            ratiow = Math.floor(ratiow * 100) / 100
+            ratioh = Math.floor(ratioh * 100) / 100
           }
           if (manager.active_UI === 'frontpage') {
             manager.UI_list.frontpage.demax(demax)
           }
           if (!ratio) { return }
-          let canx = 0; let cany = 0
-          if (!landscape) {
-            canx = window.innerWidth / 2 - parseInt(window.getComputedStyle(util.container, null).getPropertyValue('width')) / 2 * ratio
-          } else {
-            cany = window.innerHeight / 2 - parseInt(window.getComputedStyle(util.container, null).getPropertyValue('width')) / 2 * ratio
-          }
-          if (demax) { canx = 0 }
+          const canx = 0
+          const cany = 0
           if (Fsupport.css3dtransform) {
             util.container.style[Fsupport.css3dtransform + 'Origin'] = '0 0'
             util.container.style[Fsupport.css3dtransform] =
               'translate3d(' + canx + 'px,' + cany + 'px,0) ' +
-              'scale3d(' + ratio + ',' + ratio + ',1.0) ' +
+              'scale3d(' + ratiow + ',' + ratioh + ',1.0) ' +
               (landscape ? 'translateX(' + (window_state.wide ? 450 : 580) + 'px) rotateZ(90deg) ' : '')
           } else if (Fsupport.css2dtransform) {
             util.container.style[Fsupport.css2dtransform + 'Origin'] = '0 0'
             util.container.style[Fsupport.css2dtransform] =
-              'translate(' + canx + 'px,0) ' +
-              'scale(' + ratio + ',' + ratio + ') '
+              'translate(' + canx + 'px,' + cany + 'px) ' +
+              'scale(' + ratiow + ',' + ratioh + ') '
           }
           if (last_window_state_wide !== window_state.wide) { // wide state changed
             if (window_state.wide) {
@@ -1391,7 +1398,7 @@ define(['LF/global', 'LF/network', 'LF/soundpack', 'LF/match', 'LF/util', 'LF/to
         }
         util.div('window').style.background = this.UI_list[page].bgcolor || ''
         if (window_state.maximized) {
-          document.body.style.background = this.UI_list[page].bgcolor || '#676767'
+          document.body.style.background = this.UI_list[page].bgcolor || '#000'
         }
         this.dispatch_event('onactive')
       }
