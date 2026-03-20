@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   version ? "0.1.0",
 }:
 let
@@ -24,25 +25,29 @@ let
     gst-plugins-ugly
   ];
 
-  src = pkgs.fetchFromGitHub {
-    owner = "kiramidru";
-    repo = "lf2";
-    rev = "v${version}";
-    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  desktopItem = pkgs.makeDesktopItem {
+    name = "lf2";
+    desktopName = "LF2 Remake";
+    comment = "Little Fighter 2 Remake";
+    exec = "lf2";
+    icon = "lf2";
+    terminal = false;
+    categories = [ "Game" ];
   };
 in
-pkgs.rustPlatform.buildRustPackage {
+pkgs.stdenv.mkDerivation {
   pname = "lf2";
-  inherit version src;
+  inherit version;
 
-  cargoLock.lockFile = ../src-tauri/Cargo.lock;
-
-  buildAndTestSubdir = "src-tauri";
+  src = pkgs.fetchurl {
+    url = "https://github.com/kiramidru/lf2/releases/download/v${version}/lf2-linux-x86_64.tar.gz";
+    hash = "sha256-cW/knAIV23XTf5dppYXQsuof/g6gtWw90c86S6a356s=";
+  };
 
   nativeBuildInputs = with pkgs; [
-    pkg-config
-    cargo-tauri
+    autoPatchelfHook
     wrapGAppsHook3
+    copyDesktopItems
   ];
 
   buildInputs = libraries ++ gst_plugins ++ (with pkgs; [
@@ -50,58 +55,37 @@ pkgs.rustPlatform.buildRustPackage {
     gsettings-desktop-schemas
   ]);
 
-  preBuild = ''
-    mkdir -p dist
-    cp -r $src/dist/* dist/
-  '';
+  desktopItems = [ desktopItem ];
 
-  buildPhase = ''
-    runHook preBuild
-    export HOME=$(mktemp -d)
-    cd src-tauri
-    cargo tauri build --bundles none
-    runHook postBuild
-  '';
+  sourceRoot = ".";
 
   installPhase = ''
     runHook preInstall
 
     mkdir -p $out/bin
-    cp target/release/lf2 $out/bin/
-
-    mkdir -p $out/share/applications
-    cat > $out/share/applications/lf2.desktop << EOF
-    [Desktop Entry]
-    Name=LF2 Remake
-    Comment=Little Fighter 2 Remake
-    Exec=lf2
-    Icon=lf2
-    Terminal=false
-    Type=Application
-    Categories=Game;
-    EOF
+    cp lf2-v${version}/lf2 $out/bin/
 
     mkdir -p $out/share/icons/hicolor/32x32/apps
     mkdir -p $out/share/icons/hicolor/128x128/apps
     mkdir -p $out/share/icons/hicolor/256x256/apps
-    cp icons/32x32.png $out/share/icons/hicolor/32x32/apps/lf2.png
-    cp icons/128x128.png $out/share/icons/hicolor/128x128/apps/lf2.png
-    cp "icons/128x128@2x.png" $out/share/icons/hicolor/256x256/apps/lf2.png
+    cp lf2-v${version}/icons/32x32.png $out/share/icons/hicolor/32x32/apps/lf2.png
+    cp lf2-v${version}/icons/128x128.png $out/share/icons/hicolor/128x128/apps/lf2.png
+    cp "lf2-v${version}/icons/128x128@2x.png" $out/share/icons/hicolor/256x256/apps/lf2.png
 
     runHook postInstall
   '';
 
   preFixup = ''
     gappsWrapperArgs+=(
-      --set GST_PLUGIN_SYSTEM_PATH_1_0 "${pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins}"
+      --set GST_PLUGIN_SYSTEM_PATH_1_0 "${lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins}"
     )
   '';
 
-  meta = with pkgs.lib; {
+  meta = with lib; {
     description = "Little Fighter 2 Remake - A Tauri Application";
     homepage = "https://github.com/kiramidru/lf2";
     license = licenses.mit;
-    platforms = platforms.linux;
+    platforms = [ "x86_64-linux" ];
     mainProgram = "lf2";
   };
 }
