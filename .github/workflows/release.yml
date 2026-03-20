@@ -1,0 +1,46 @@
+name: Release Build
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            libjavascriptcoregtk-4.1-dev \
+            libglib2.0-dev \
+            librsvg2-dev \
+            libsoup-3.0-dev \
+            libappindicator3-dev \
+            pkg-config \
+            build-essential
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Tauri CLI
+        run: cargo install cargo-tauri
+
+      - name: Build Tauri App
+        run: cargo tauri build --bundles ""
+
+      - name: Prepare Tarball
+        run: |
+          mkdir -p release
+          cp src-tauri/target/release/lf2 release/
+          tar -czvf lf2-linux-x86_64.tar.gz -C release .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lf2-linux-bin
+          path: lf2-linux-x86_64.tar.gz

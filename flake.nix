@@ -21,27 +21,31 @@
           overlays = [ rust-overlay.overlays.default ];
         };
 
-        lf2-app = pkgs.callPackage ./package.nix {
-          rustPlatform = pkgs.makeRustPlatform {
-            cargo = pkgs.rust-bin.stable.latest.default;
-            rustc = pkgs.rust-bin.stable.latest.default;
-          };
-        };
+        libraries = with pkgs; [
+          webkitgtk_4_1
+          librsvg
+          gtk3
+          libsoup_3
+          glib
+          at-spi2-atk
+          pango
+          gdk-pixbuf
+          cairo
+        ];
+
+        buildTools = with pkgs; [
+          pkg-config
+          cargo-tauri
+          rust-bin.stable.latest.default
+        ];
       in
       {
-        packages.default = lf2-app;
-
         devShells.default = pkgs.mkShell {
-          inputsFrom = [ lf2-app ];
-          packages = with pkgs; [
-            cargo-edit # For 'cargo add'
-          ];
-
+          nativeBuildInputs = buildTools;
+          buildInputs = libraries;
           shellHook = ''
-            echo "🛡️ LF2 Development Environment Loaded"
-            # Your GStreamer and XDG fixes go here
             export GST_PLUGIN_SYSTEM_PATH_1_0="${
-              pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" lf2-app.buildInputs
+              pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" libraries
             }"
           '';
         };
