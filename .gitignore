@@ -1,0 +1,45 @@
+# --- Nix / Direnv ---
+.direnv/
+result
+result-*
+.envrc
+
+# --- Rust / Cargo ---
+/src-tauri/target/
+**/*.rs.bk
+Cargo.lock
+# Keep Cargo.lock for apps, but some developers ignore it during early dev.
+# For Tauri apps, it's generally recommended to keep it.
+
+# --- Node.js / Frontend ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+.svelte-kit/
+.next/
+.pnpm-store/
+
+# --- Tauri Specific ---
+src-tauri/binaries/*
+!src-tauri/binaries/.gitkeep
+src-tauri/gen/
+src-tauri/bundle/
+
+# --- OS / IDE Specific ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~
+.nvim.lua
+
+# --- Secrets (agenix/proton) ---
+*.age
+.env
+.env.*
+! .env.example
