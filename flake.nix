@@ -1,10 +1,8 @@
 {
-  description = "Rust Development Environment";
-
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/fbcf476f790d8a217c3eab4e12033dc4";
-    flake-utils.url = "github:numtide/flake-utils/11707dc2f618dd54ca8739b309ec4fc024de578b";
-    rust-overlay.url = "github:oxalica/rust-overlay/292ca754b0f679b842fbfc4734f017c351f0e9eb";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
   outputs =
@@ -13,6 +11,7 @@
       nixpkgs,
       flake-utils,
       rust-overlay,
+      ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -22,47 +21,28 @@
           overlays = [ rust-overlay.overlays.default ];
         };
 
-        gst-plugins = with pkgs.gst_all_1; [
-          gstreamer
-          gst-plugins-base
-          gst-plugins-good
-          gst-plugins-bad
-          gst-plugins-ugly
-          gst-libav
-        ];
-
-        rust = pkgs.rust-bin.stable.latest.default.override {
-          targets = [ "x86_64-unknown-linux-gnu" ];
+        lf2-app = pkgs.callPackage ./package.nix {
+          rustPlatform = pkgs.makeRustPlatform {
+            cargo = pkgs.rust-bin.stable.latest.default;
+            rustc = pkgs.rust-bin.stable.latest.default;
+          };
         };
       in
       {
-        devShells.default = pkgs.mkShell {
-          buildInputs = [
-            rust
-            pkgs.rust-analyzer
-            pkgs.clippy
-            pkgs.rustfmt
-            pkgs.librsvg
-            pkgs.webkitgtk_4_1
-          ]
-          ++ gst-plugins;
+        packages.default = lf2-app;
 
-          nativeBuildInputs = with pkgs; [
-            pkg-config
-            wrapGAppsHook4
-            cargo
-            cargo-tauri
-            nodejs
+        devShells.default = pkgs.mkShell {
+          inputsFrom = [ lf2-app ];
+          packages = with pkgs; [
+            cargo-edit # For 'cargo add'
           ];
 
           shellHook = ''
-            # Fix for GStreamer plugins on NixOS
+            echo "🛡️ LF2 Development Environment Loaded"
+            # Your GStreamer and XDG fixes go here
             export GST_PLUGIN_SYSTEM_PATH_1_0="${
-              pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst-plugins
+              pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" lf2-app.buildInputs
             }"
-
-            # Keep your existing Wayland fix
-            export XDG_DATA_DIRS="$GSETTINGS_SCHEMAS_PATH:$XDG_DATA_DIRS"
           '';
         };
       }

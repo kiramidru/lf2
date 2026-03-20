@@ -7,9 +7,6 @@ result-*
 # --- Rust / Cargo ---
 /src-tauri/target/
 **/*.rs.bk
-Cargo.lock
-# Keep Cargo.lock for apps, but some developers ignore it during early dev.
-# For Tauri apps, it's generally recommended to keep it.
 
 # --- Node.js / Frontend ---
 node_modules/
