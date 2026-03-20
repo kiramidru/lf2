@@ -41,7 +41,7 @@ pkgs.stdenv.mkDerivation {
 
   src = pkgs.fetchurl {
     url = "https://github.com/kiramidru/lf2/releases/download/v${version}/lf2-linux-x86_64.tar.gz";
-    hash = "sha256-1i6zmTRTuS8u7Uf7QxAKfr0d0huq9Blz5udfaUmURp0=";
+    hash = "sha256-cW/knAIV23XT35dpqFXQsuof/g6gtWw90c86S6a35+s=";
   };
 
   nativeBuildInputs = with pkgs; [
