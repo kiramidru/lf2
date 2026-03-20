@@ -52,14 +52,26 @@
             gst-plugins-ugly
           ];
 
+          # Package version - update this when releasing
+          version = "0.1.0";
+
+          # Source from GitHub releases
+          src = pkgs.fetchFromGitHub {
+            owner = "kiramidru";
+            repo = "lf2";
+            rev = "v${version}";
+            # To get the hash, run:
+            # nix-prefetch-url --unpack https://github.com/kiramidru/lf2/archive/v0.1.0.tar.gz
+            hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+          };
+
           # The lf2 package
           lf2 = pkgs.rustPlatform.buildRustPackage {
             pname = "lf2";
-            version = "0.1.0";
-
-            src = ./.;
+            inherit version src;
 
             cargoLock = {
+              # Keep this in sync with the release version's Cargo.lock
               lockFile = ./src-tauri/Cargo.lock;
             };
 
@@ -82,7 +94,7 @@
             preBuild = ''
               # Ensure dist folder exists for tauri build
               mkdir -p dist
-              cp -r ${./dist}/* dist/
+              cp -r $src/dist/* dist/
             '';
 
             # Use cargo-tauri to build
@@ -137,7 +149,7 @@
 
             meta = with pkgs.lib; {
               description = "Little Fighter 2 Remake - A Tauri Application";
-              homepage = "https://github.com/your-username/lf2";
+              homepage = "https://github.com/kiramidru/lf2";
               license = licenses.mit;
               maintainers = [ ];
               platforms = platforms.linux;
