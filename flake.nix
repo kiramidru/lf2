@@ -31,22 +31,38 @@
           pango
           gdk-pixbuf
           cairo
+          openssl
         ];
 
-        buildTools = with pkgs; [
-          pkg-config
-          cargo-tauri
-          rust-bin.stable.latest.default
+        gst_plugins = with pkgs.gst_all_1; [
+          gstreamer
+          gst-plugins-base
+          gst-plugins-good
+          gst-plugins-bad
+          gst-plugins-ugly
         ];
+
+        buildTools =
+          with pkgs;
+          [
+            pkg-config
+            cargo-tauri
+            rust-bin.stable.latest.default
+          ]
+          ++ gst_plugins;
       in
       {
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = buildTools;
           buildInputs = libraries;
+
           shellHook = ''
+            # We tell GStreamer exactly where the plugins are in the Nix store
             export GST_PLUGIN_SYSTEM_PATH_1_0="${
-              pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" libraries
+              pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gst_plugins
             }"
+
+            export XDG_DATA_DIRS="$GSETTINGS_SCHEMAS_PATH:$XDG_DATA_DIRS"
           '';
         };
       }

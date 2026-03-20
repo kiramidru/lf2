@@ -10,10 +10,10 @@
         "withGlobalTauri": true,
         "windows": [
             {
-                "title": "lf2",
-                "width": 800,
-                "height": 600,
-                "url": "F.LF/game/game.html"
+                "title": "LF2 Remake",
+                "url": "F.LF/game/game.html",
+                "decorations": false,
+                "center": true
             }
         ],
         "security": {

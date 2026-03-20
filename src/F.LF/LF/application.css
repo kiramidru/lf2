@@ -88,11 +88,11 @@
 {
 	position:relative;
 	top:0px;
-	width:794px; height:30px;
-	border:5px solid #676767;
-	border-width:0 5px;
-	background:#676767;
+	width:794px; height:0px;
+	border:0;
+	background:transparent;
 	z-index:10;
+	overflow:hidden;
 }
 .window_caption_title
 {
